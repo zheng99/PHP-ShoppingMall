@@ -1,0 +1,226 @@
+<?
+	//manModel.php
+	echo "Product Management";
+
+	//관리자메뉴 이기때문에 보안상 다 보호해줘야 한다.
+	if($_SESSION[$sess_level] < $adminLevel)
+	{
+		echo "
+		<script>
+			alert('Wrong Access');
+			location.href='$PHP_SELF';
+		</script>
+		";
+		exit();
+	}
+	//cab 메뉴
+	$menuList[1] = "Section";
+	$menuList[2] = "Group";
+	$menuList[3] = "Product Registration";
+	$menuList[4] = "Product List";
+	$menuList[5] = "Test";
+
+	$cnt = 1;
+
+	if(!$sub) // 제품관리를 누르면 첫번째 메뉴가 선택
+	{
+		$sub = 1;
+	}
+
+
+	echo "
+	<table border=0>
+		<tr height=40>";
+		while($menuList[$cnt])
+		{
+			if($sub == $cnt)
+				$menuClass = "subMenuSelected";
+			else
+				$menuClass = "subMenu";
+
+			echo "<td class=$menuClass><a href='$PHP_SELF?cmd=$cmd&sub=$cnt'>$menuList[$cnt]</a></td>";
+			$cnt ++;
+
+			if($menuList[$cnt]) // 이렇게 안하면 맨 마지막에 칸이 하나 남아서 쓸모없는 공간이 생긴다
+			{
+				echo "<td width=10></td>";
+			}
+		}
+		echo"
+		</tr>
+	</table><br><br>";
+
+	if($sub ==1)
+	{
+		//검사
+		if($mode == "insert")
+		{
+			$sql = "INSERT INTO $cat1_table VALUES(
+				'', '$title', '$odr', '$useflag'
+			)";
+			$result = mysql_query($sql);
+			if($result)
+				$msg = "Insert Success";
+			else
+				$msg = "Insert Fail";
+
+			echo "
+			<script>
+				alert('$msg');
+				location.href='$PHP_SELF?cmd=$cmd&sub=$sub';
+			</script>
+			";
+
+		}
+
+		if($mode == "update")
+		{
+			$sql = "UPDATE $cat1_table SET
+						title='$title',odr='$odr',
+						useflag='$useflag',
+						WHERE idx='$idx'
+					";
+			$result = mysql_query($sql);
+			if($result)
+				$msg = "Update Success";
+			else
+				$msg = "Update Fail";
+
+			echo "
+			<script>
+				alert('$msg');
+				location.href='$PHP_SELF?cmd=$cmd&sub=$sub';
+			</script>
+			";
+
+		}
+
+		// onsubmit 제출시 에러 검사
+		// f.title.focus() 타이틀의 커서 깜빡이게 해준다
+		echo "
+		<script>
+			function checkError()
+			{
+				var f = document.catForm;
+				if(f.title.value == '')
+				{
+					alert('Title Insert');
+					f.title.focus();
+					return false;
+				}
+				if(f.odr.value == '')
+				{
+					alert('No Insert');
+					f.odr.focus();
+					return false;
+				}
+			}
+		</script>
+
+		<form name=catForm method=post
+		action='$PHP_SELF?cmd=$cmd&sub=$sub&mode=insert'
+		onSubmit=\"return checkError()\">
+		<table border=0 width=90%>
+			<tr>
+				<td colspan=4 class=menuTitle>Section</td>
+			</tr>";
+
+			// as newodr로 이름을 붙여서 가지고 온다
+
+			$sql = "SELECT MAX(odr) +1 AS newodr FROM cat1_table";
+			$result = mysql_query($sql);
+			$info = mysql_fetch_array($result);
+
+			if($info[newodr])
+				$newodr = $info[newodr];
+			else
+				$newodr = 1;
+
+			echo "
+			<tr>
+				<td class=menuLeft>Title</td>
+				<td class=menuRight>
+					<input type=text name=title placeholder='Title Insert' class=inputBox>
+				</td>
+				<td class=menuLeft>No</td>
+				<td class=menuRight>
+					<input type=text name=odr placeholder='No' value=$newodr class=inputBox>
+				</td>
+			</tr>
+
+			<tr>
+				<td class=menuLeft>UseFlag</td>
+				<td class=menuRight>
+					<select name=useflag class=inputBox>
+						<option value='1'>Use</option>
+						<option value='0'>------</option>
+					</select>
+				</td>
+
+				<td colspan=2 class=menuLeft>
+					<input type=submit class=submit value='Registration'>
+				</td>
+			</tr>
+
+		</table></form><br><br>
+		";
+
+		$sql = "SELECT * FROM $cat1_table";
+		$result = mysql_query($sql);
+		$data = mysql_fetch_array($result);
+
+		if($data)
+		{
+			echo "
+			<table border=0 width=90%>
+				<tr>
+					<td class=ud>순서</td>
+					<td class=ud>분류명</td>
+					<td class=ud>사용</td>
+					<td class=ud>비고</td>
+				</tr>
+				";
+				while($data)
+				{
+					//value 기본값이 1이므로 mark값을 붙여줘서 0인것을 확인해준다
+					if($data[useflag] ==0)
+					{
+						$mark = "selected";
+					} else
+						$mark = "";
+					echo "
+					<form method=post action='$PHP_SELF?cmd=$cmd&sub=$sub&mode=update&idx=$data[idx]'>
+					<tr>
+						<td class=ud><input type=text
+						name=odr value='$data[odr]'>
+						</td>
+						<td class=ud><input type=text
+						name=title value='$data[title]'>
+						</td>
+						<td class=ud>
+							<select name=useflag>
+								<option value='1'>사용</option>
+								<option value='0'$mark>------</option>
+							</select>
+						</td>
+						<td class=ud>
+							<input type=submit value='등록'>
+							<input type=submit value='삭제'>
+						</td>
+					</tr>
+					</form>
+					";
+					$data = mysql_fetch_array($result);
+				}
+			echo "
+			</table>
+			";
+		} else
+		{
+			echo "No Data";
+		}
+
+	}
+
+?>
+

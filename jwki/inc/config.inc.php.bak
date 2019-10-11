@@ -1,0 +1,24 @@
+<?
+	// config.inc.php
+
+	$sess_id = "jwki_id";
+	$sess_name = "jwki_name";
+	$sess_level = "jwki_level";
+	$sess_ip	= "jwki_ip";
+	$sess_time	= "jwki_time";
+
+	$adminLevel = 9;
+
+	$thumb[1] = 50;
+	$thumb[2] = 180;
+	$thumb[3] = 700;
+	$thumb[4] = 700;
+
+	$status_list[1] = "주문접수";
+	$status_list[2] = "입금대기";
+	$status_list[3] = "입금완료";
+	$status_list[4] = "배송준비";
+	$status_list[5] = "배송중";
+	$status_list[6] = "배송완료";
+	$status_list[7] = "Cancel";
+?>

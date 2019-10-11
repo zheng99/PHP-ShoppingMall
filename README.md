@@ -3,4 +3,4 @@
 
 
 ## Main Page
-![main](./screen/main.png)<br>
+![main](./screen/Main.png)<br>
